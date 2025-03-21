@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizador de Script con JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1, h2, h3 {
+            color: #4285f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+            grid-column: 1 / span 2;
+        }
+
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #3b78e7;
+        }
+
+        button.secondary {
+            background-color: #34a853;
+        }
+
+        button.secondary:hover {
+            background-color: #2d9249;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .instructions {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #fbbc05;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-button {
+            background-color: #34a853;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .copy-button:hover {
+            background-color: #2d9249;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Actualizador de Script con JSON</h1>
+    <a href="/generador-json.html">Generador JSON</a> <br>
+    <a href="/">Visualizacion de JSON</a> <br>
+    <a href="/generador-script.html">Generador de Script completo</a>
+    <div class="instructions">
+        <h3>Instrucciones:</h3>
+        <ol>
+            <li>Pega tu JSON en el panel izquierdo.</li>
+            <li>Haz clic en "Actualizar Script" para generar el script actualizado.</li>
+            <li>El script generado aparecerá en el panel derecho.</li>
+            <li>Copia el script generado y pégalo en tu Editor de Script de Google Slides.</li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <div class="title-container">
+                <label for="jsonInput">Pega tu JSON aquí:</label>
+                <button class="copy-button" onclick="limpiarJSON()">Limpiar</button>
+            </div>
+            <textarea id="jsonInput" placeholder='Pega tu JSON aquí. Ejemplo:
+{
+  "{{RESPASO_PUNTO1}}": "Repasamos el vocabulario sobre actividades de ocio.",
+  "{{RESPASO_PUNTO2}}": "Practicamos el uso de verbos.",
+  "{{HOY_VEREMOS_PUNTO1}}": "Vocabulario sobre las rutinas diarias."
+}'></textarea>
+        </div>
+
+        <div class="panel">
+            <div class="title-container">
+                <label for="scriptOutput">Script Actualizado:</label>
+                <button class="copy-button" onclick="copiarScript()">Copiar</button>
+            </div>
+            <textarea id="scriptOutput" readonly></textarea>
+        </div>
+
+        <div class="buttons">
+            <button onclick="actualizarScript()">Actualizar Script</button>
+            <button class="secondary" onclick="copiarScript()">Copiar Script</button>
+        </div>
+    </div>
+
+    <script>
+        // Script base
+        const scriptBase = `// Script ultra simple para reemplazar texto en una presentación
+// Crear un botón en el menú
+function onOpen() {
+  SlidesApp.getUi()
+    .createMenu('Reemplazar')
+    .addItem('Ejecutar reemplazo', 'ejecutarReemplazo')
+    .addToUi();
+}
+
+// Función que ejecuta el reemplazo directamente
+function ejecutarReemplazo() {
+  // CONFIGURA AQUÍ TUS REEMPLAZOS - ASEGÚRATE QUE COINCIDAN EXACTAMENTE
+  var reemplazos = REEMPLAZOS_JSON;
+
+  // Obtener presentación
+  var presentacion = SlidesApp.getActivePresentation();
+  var diapositivas = presentacion.getSlides();
+  var total = 0;
+
+  // Para cada diapositiva, buscar y reemplazar texto
+  for (var i = 0; i < diapositivas.length; i++) {
+    var diapositiva = diapositivas[i];
+    var elementos = diapositiva.getPageElements();
+    for (var j = 0; j < elementos.length; j++) {
+      var elemento = elementos[j];
+      // Procesar formas (que contienen texto)
+      if (elemento.getPageElementType() === SlidesApp.PageElementType.SHAPE) {
+        var forma = elemento.asShape();
+        if (forma.getText) {
+          for (var marcador in reemplazos) {
+            var textoNuevo = reemplazos[marcador];
+            total += reemplazarEnElemento(forma, marcador, textoNuevo);
+          }
+        }
+      }
+      // Procesar tablas
+      if (elemento.getPageElementType() === SlidesApp.PageElementType.TABLE) {
+        var tabla = elemento.asTable();
+        var filas = tabla.getNumRows();
+        var columnas = tabla.getNumColumns();
+        for (var r = 0; r < filas; r++) {
+          for (var c = 0; c < columnas; c++) {
+            var celda = tabla.getCell(r, c);
+            for (var marcador in reemplazos) {
+              var textoNuevo = reemplazos[marcador];
+              total += reemplazarEnElemento(celda, marcador, textoNuevo);
+            }
+          }
+        }
+      }
+    }
+  }
+  // Mostrar mensaje de resultado
+  SlidesApp.getUi().alert("Se realizaron " + total + " reemplazos.");
+}
+
+// Función auxiliar para reemplazar texto en un elemento
+function reemplazarEnElemento(elemento, marcador, textoNuevo) {
+  var texto = elemento.getText();
+  var contenido = texto.asString();
+  if (contenido.indexOf(marcador) >= 0) {
+    texto.replaceAllText(marcador, textoNuevo);
+    return 1;
+  }
+  return 0;
+}`;
+
+        // Función para actualizar el script con el JSON
+        function actualizarScript() {
+            try {
+                // Obtener el JSON
+                const jsonText = document.getElementById('jsonInput').value.trim();
+                if (!jsonText) {
+                    alert('Por favor, ingresa un JSON válido');
+                    return;
+                }
+
+                // Intentar parsear el JSON
+                const jsonObj = JSON.parse(jsonText);
+
+                // Formatear el JSON para el script
+                let formattedJson = JSON.stringify(jsonObj, null, 2);
+                // Hacer que cada línea esté indentada correctamente para el script
+                formattedJson = formattedJson.replace(/\n/g, '\n  ');
+
+                // Reemplazar el marcador en el script
+                const scriptFinal = scriptBase.replace('REEMPLAZOS_JSON', formattedJson);
+
+                // Mostrar el script final
+                document.getElementById('scriptOutput').value = scriptFinal;
+            } catch (error) {
+                alert('Error al procesar el JSON: ' + error.message);
+            }
+        }
+
+        // Función para copiar el script generado
+        function copiarScript() {
+            const scriptOutput = document.getElementById('scriptOutput');
+            if (!scriptOutput.value.trim()) {
+                alert('Primero debes generar el script actualizado');
+                return;
+            }
+
+            scriptOutput.select();
+            document.execCommand('copy');
+            alert('Script copiado al portapapeles');
+        }
+
+        // Función para limpiar el área de JSON
+        function limpiarJSON() {
+            document.getElementById('jsonInput').value = '';
+        }
+
+        // Cargar el script base al iniciar
+        window.onload = function() {
+            document.getElementById('scriptOutput').value = scriptBase.replace('REEMPLAZOS_JSON', '{\n  "{{EJEMPLO}}": "Valor de ejemplo"\n}');
+        };
+    </script>
+</body>
+
+</html>
