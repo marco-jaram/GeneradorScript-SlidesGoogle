@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de JSON para Plantilla de Clase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1, h2, h3 {
+            color: #4285f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4285f4;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #4285f4;
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #3b78e7;
+        }
+
+        button.secondary {
+            background-color: #34a853;
+        }
+
+        button.secondary:hover {
+            background-color: #2d9249;
+        }
+
+        #jsonOutput {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            overflow: auto;
+            white-space: pre;
+            box-sizing: border-box;
+        }
+        
+        .output-container {
+            margin-top: 20px;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .active, .accordion:hover {
+            background-color: #ddd;
+        }
+
+        .panel {
+            padding: 0 10px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-radius: 0 0 4px 4px;
+            border: 1px solid #eee;
+            border-top: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Generador de JSON para Plantilla de Clase</h1>
+    <a href="/">Visualizacion de JSON</a> <br>
+    <a href="/generador.html">Generador JSON</a>
+    <div class="buttons">
+        <button type="button" onclick="generarJSON()">Generar JSON</button>
+        <button type="button" class="secondary" onclick="copiarJSON()">Copiar JSON</button>
+        <button type="button" onclick="limpiarCampos()">Limpiar Campos</button>
+    </div>
+
+    <div class="output-container">
+        <h3>JSON Generado:</h3>
+        <div id="jsonOutput"></div>
+    </div>
+
+    <h2>Completa los campos:</h2>
+
+    <button class="accordion">2. Repaso (5 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="RESPASO_PUNTO1">Punto 1:</label>
+                <input type="text" id="RESPASO_PUNTO1" placeholder="Primer punto de repaso">
+            </div>
+            <div class="input-group">
+                <label for="RESPASO_PUNTO2">Punto 2:</label>
+                <input type="text" id="RESPASO_PUNTO2" placeholder="Segundo punto de repaso">
+            </div>
+            <div class="input-group">
+                <label for="RESPASO_PUNTO3">Punto 3:</label>
+                <input type="text" id="RESPASO_PUNTO3" placeholder="Tercer punto de repaso">
+            </div>
+            <div class="input-group">
+                <label for="RESPASO_PUNTO4">Punto 4:</label>
+                <input type="text" id="RESPASO_PUNTO4" placeholder="Cuarto punto de repaso">
+            </div>
+            <div class="input-group">
+                <label for="RESPASO_PUNTO5">Punto 5:</label>
+                <input type="text" id="RESPASO_PUNTO5" placeholder="Quinto punto de repaso">
+            </div>
+            <div class="input-group">
+                <label for="RESPASO_EJEMPLO_PERSONAL">Ejemplo Personal:</label>
+                <textarea id="RESPASO_EJEMPLO_PERSONAL" placeholder="Ejemplo personal relacionado con el repaso"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <button class="accordion">3. Hoy veremos (2 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO1">Punto 1:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO1" placeholder="Primer objetivo de la sesión">
+            </div>
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO2">Punto 2:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO2" placeholder="Segundo objetivo de la sesión">
+            </div>
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO3">Punto 3:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO3" placeholder="Tercer objetivo de la sesión">
+            </div>
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO4">Punto 4:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO4" placeholder="Cuarto objetivo de la sesión">
+            </div>
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO5">Punto 5:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO5" placeholder="Quinto objetivo de la sesión">
+            </div>
+            <div class="input-group">
+                <label for="HOY_VEREMOS_PUNTO6">Punto 6:</label>
+                <input type="text" id="HOY_VEREMOS_PUNTO6" placeholder="Sexto objetivo de la sesión">
+            </div>
+        </div>
+    </div>
+
+    <button class="accordion">4. Historia de hoy (20 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="HISTORIA">Historia principal:</label>
+                <textarea id="HISTORIA" placeholder="Historia principal con TPRS"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR1">Pregunta Circular 1:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR1" placeholder="Primera pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR2">Pregunta Circular 2:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR2" placeholder="Segunda pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR3">Pregunta Circular 3:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR3" placeholder="Tercera pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR4">Pregunta Circular 4:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR4" placeholder="Cuarta pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR5">Pregunta Circular 5:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR5" placeholder="Quinta pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR6">Pregunta Circular 6:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR6" placeholder="Sexta pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="PREGUNTA_CIRCULAR7">Pregunta Circular 7:</label>
+                <input type="text" id="PREGUNTA_CIRCULAR7" placeholder="Séptima pregunta circular">
+            </div>
+            <div class="input-group">
+                <label for="JUEGO_DE_ROL_TITULO">Título del juego de rol:</label>
+                <input type="text" id="JUEGO_DE_ROL_TITULO" placeholder="Título para la actividad de juego de rol">
+            </div>
+            <div class="input-group">
+                <label for="JUEGO_DE_ROL">Descripción del juego de rol:</label>
+                <textarea id="JUEGO_DE_ROL" placeholder="Descripción de la actividad de juego de rol"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <button class="accordion">5. Lectura corta (8 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="LECTURA_CORTA">Texto de lectura:</label>
+                <textarea id="LECTURA_CORTA" placeholder="Texto de lectura corta"></textarea>
+            </div>
+            
+            <h4>Preguntas de comprensión:</h4>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA1">Pregunta 1:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA1" placeholder="Primera pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA2">Pregunta 2:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA2" placeholder="Segunda pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA3">Pregunta 3:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA3" placeholder="Tercera pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA4">Pregunta 4:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA4" placeholder="Cuarta pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA5">Pregunta 5:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA5" placeholder="Quinta pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA6">Pregunta 6:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA6" placeholder="Sexta pregunta de comprensión">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA7">Pregunta 7:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA7" placeholder="Séptima pregunta de comprensión">
+            </div>
+            
+            <h4>Preguntas personalizadas:</h4>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL1">Pregunta Personal 1:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL1" placeholder="Primera pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL2">Pregunta Personal 2:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL2" placeholder="Segunda pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL3">Pregunta Personal 3:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL3" placeholder="Tercera pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL4">Pregunta Personal 4:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL4" placeholder="Cuarta pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL5">Pregunta Personal 5:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL5" placeholder="Quinta pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL6">Pregunta Personal 6:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL6" placeholder="Sexta pregunta personalizada">
+            </div>
+            <div class="input-group">
+                <label for="LECTURA_CORTA_PREGUNTA_PERSONAL7">Pregunta Personal 7:</label>
+                <input type="text" id="LECTURA_CORTA_PREGUNTA_PERSONAL7" placeholder="Séptima pregunta personalizada">
+            </div>
+        </div>
+    </div>
+
+    <button class="accordion">6. Resumen (3 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="RESUMEN_DE_SESION">Resumen de la sesión:</label>
+                <textarea id="RESUMEN_DE_SESION" placeholder="Síntesis de los puntos clave aprendidos"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <button class="accordion">7. Tarea (5 min)</button>
+    <div class="panel">
+        <div class="section">
+            <div class="input-group">
+                <label for="TAREA_TITULO">Título de la tarea:</label>
+                <input type="text" id="TAREA_TITULO" placeholder="Título de la tarea">
+            </div>
+            <div class="input-group">
+                <label for="TAREA_INSTRUCCIONES">Instrucciones:</label>
+                <textarea id="TAREA_INSTRUCCIONES" placeholder="Instrucciones para la tarea"></textarea>
+            </div>
+            <div class="input-group">
+                <label for="TAREA_PUNTO1">Punto 1:</label>
+                <input type="text" id="TAREA_PUNTO1" placeholder="Primer punto de la tarea">
+            </div>
+            <div class="input-group">
+                <label for="TAREA_PUNTO2">Punto 2:</label>
+                <input type="text" id="TAREA_PUNTO2" placeholder="Segundo punto de la tarea">
+            </div>
+            <div class="input-group">
+                <label for="TAREA_PUNTO3">Punto 3:</label>
+                <input type="text" id="TAREA_PUNTO3" placeholder="Tercer punto de la tarea">
+            </div>
+            <div class="input-group">
+                <label for="TAREA_PUNTO4">Punto 4:</label>
+                <input type="text" id="TAREA_PUNTO4" placeholder="Cuarto punto de la tarea">
+            </div>
+            <div class="input-group">
+                <label for="TAREA_PUNTO5">Punto 5:</label>
+                <input type="text" id="TAREA_PUNTO5" placeholder="Quinto punto de la tarea">
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button type="button" onclick="generarJSON()">Generar JSON</button>
+        <button type="button" class="secondary" onclick="copiarJSON()">Copiar JSON</button>
+        <button type="button" onclick="limpiarCampos()">Limpiar Campos</button>
+    </div>
+
+    <script>
+        // Configurar acordeones
+        var acc = document.getElementsByClassName("accordion");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+        }
+
+        // Función para generar el JSON
+        function generarJSON() {
+            const jsonObj = {};
+            
+            // Función para agregar un campo al objeto JSON si tiene valor
+            function agregarCampo(id) {
+                const elemento = document.getElementById(id);
+                if (elemento && elemento.value.trim() !== "") {
+                    jsonObj[id] = elemento.value.trim();
+                }
+            }
+            
+            // Lista de todos los IDs de campos que queremos incluir
+            const campos = [
+                // Repaso
+                "RESPASO_PUNTO1", "RESPASO_PUNTO2", "RESPASO_PUNTO3", "RESPASO_PUNTO4", "RESPASO_PUNTO5",
+                "RESPASO_EJEMPLO_PERSONAL",
+                
+                // Hoy veremos
+                "HOY_VEREMOS_PUNTO1", "HOY_VEREMOS_PUNTO2", "HOY_VEREMOS_PUNTO3", 
+                "HOY_VEREMOS_PUNTO4", "HOY_VEREMOS_PUNTO5", "HOY_VEREMOS_PUNTO6",
+                
+                // Historia
+                "HISTORIA", 
+                "PREGUNTA_CIRCULAR1", "PREGUNTA_CIRCULAR2", "PREGUNTA_CIRCULAR3", "PREGUNTA_CIRCULAR4",
+                "PREGUNTA_CIRCULAR5", "PREGUNTA_CIRCULAR6", "PREGUNTA_CIRCULAR7",
+                "JUEGO_DE_ROL_TITULO", "JUEGO_DE_ROL",
+                
+                // Lectura
+                "LECTURA_CORTA",
+                "LECTURA_CORTA_PREGUNTA1", "LECTURA_CORTA_PREGUNTA2", "LECTURA_CORTA_PREGUNTA3",
+                "LECTURA_CORTA_PREGUNTA4", "LECTURA_CORTA_PREGUNTA5", "LECTURA_CORTA_PREGUNTA6",
+                "LECTURA_CORTA_PREGUNTA7",
+                "LECTURA_CORTA_PREGUNTA_PERSONAL1", "LECTURA_CORTA_PREGUNTA_PERSONAL2", 
+                "LECTURA_CORTA_PREGUNTA_PERSONAL3", "LECTURA_CORTA_PREGUNTA_PERSONAL4",
+                "LECTURA_CORTA_PREGUNTA_PERSONAL5", "LECTURA_CORTA_PREGUNTA_PERSONAL6",
+                "LECTURA_CORTA_PREGUNTA_PERSONAL7",
+                
+                // Resumen
+                "RESUMEN_DE_SESION",
+                
+                // Tarea
+                "TAREA_TITULO", "TAREA_INSTRUCCIONES",
+                "TAREA_PUNTO1", "TAREA_PUNTO2", "TAREA_PUNTO3", "TAREA_PUNTO4", "TAREA_PUNTO5"
+            ];
+            
+            // Agregar cada campo al objeto JSON
+            campos.forEach(agregarCampo);
+            
+            // Mostrar el JSON formateado
+            const jsonOutput = document.getElementById("jsonOutput");
+            jsonOutput.textContent = JSON.stringify(jsonObj, null, 2);
+        }
+        
+        // Función para copiar el JSON generado
+        function copiarJSON() {
+            const jsonOutput = document.getElementById("jsonOutput");
+            if (jsonOutput.textContent.trim() === "") {
+                alert("Primero debes generar el JSON");
+                return;
+            }
+            
+            // Crear un elemento de texto temporal
+            const textarea = document.createElement("textarea");
+            textarea.value = jsonOutput.textContent;
+            document.body.appendChild(textarea);
+            
+            // Seleccionar y copiar
+            textarea.select();
+            document.execCommand("copy");
+            
+            // Limpiar
+            document.body.removeChild(textarea);
+            alert("JSON copiado al portapapeles");
+        }
+        
+        // Función para limpiar todos los campos
+        function limpiarCampos() {
+            if (!confirm("¿Estás seguro de que quieres limpiar todos los campos?")) {
+                return;
+            }
+            
+            const inputs = document.querySelectorAll("input[type='text'], textarea");
+            inputs.forEach(input => {
+                input.value = "";
+            });
+            
+            document.getElementById("jsonOutput").textContent = "";
+        }
+        
+        // Abrir el primer acordeón por defecto
+        window.onload = function() {
+            // Abrir el primer acordeón
+            if (acc.length > 0) {
+                acc[0].click();
+            }
+        };
+    </script>
+</body>
+
+</html>
