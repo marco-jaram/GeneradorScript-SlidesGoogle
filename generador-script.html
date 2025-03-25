@@ -111,6 +111,12 @@
         .copy-button:hover {
             background-color: #2d9249;
         }
+        
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -127,6 +133,8 @@
             <li>El script generado aparecerá en el panel derecho.</li>
             <li>Copia el script generado y pégalo en tu Editor de Script de Google Slides.</li>
         </ol>
+        <p class="highlight">Nota importante: En tus diapositivas, debes usar los marcadores con llaves, p. ej. {{TEXTO}}. Cuando ejecutes el script, el marcador completo (incluyendo las llaves) será reemplazado por el valor del JSON.</p>
+        <p>Ejemplo: Si tienes un texto "Repaso: {{RESPASO_PUNTO1}}" en la diapositiva y en el JSON {"{{RESPASO_PUNTO1}}": "Vocabulario"}, se mostrará como "Repaso: Vocabulario" después del reemplazo.</p>
     </div>
 
     <div class="container">
