@@ -111,6 +111,23 @@
         .copy-button:hover {
             background-color: #2d9249;
         }
+        
+        .highlight {
+            background-color: #ffe082;
+            padding: 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .checkbox-container {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-container input {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -127,6 +144,7 @@
             <li>El script generado aparecerá en el panel derecho.</li>
             <li>Copia el script generado y pégalo en tu Editor de Script de Google Slides.</li>
         </ol>
+        <p class="highlight">Nota: El script ahora también eliminará automáticamente las llaves {{}} de cualquier texto que no haya sido reemplazado por el JSON.</p>
     </div>
 
     <div class="container">
@@ -159,12 +177,12 @@
 
     <script>
         // Script base
-        const scriptBase = `// Script para reemplazar texto en una presentación y eliminar las llaves {{}}
+        const scriptBase = `// Script mejorado para reemplazar texto en una presentación y eliminar llaves {{}}
 // Crear un botón en el menú
 function onOpen() {
   SlidesApp.getUi()
-    .createMenu('Reemplazar')
-    .addItem('Ejecutar reemplazo', 'ejecutarReemplazo')
+    .createMenu('Reemplazar y Limpiar')
+    .addItem('Ejecutar', 'ejecutarReemplazo')
     .addToUi();
 }
 
@@ -184,34 +202,22 @@ function ejecutarReemplazo() {
     var elementos = diapositiva.getPageElements();
     for (var j = 0; j < elementos.length; j++) {
       var elemento = elementos[j];
+      
       // Procesar formas (que contienen texto)
       if (elemento.getPageElementType() === SlidesApp.PageElementType.SHAPE) {
         var forma = elemento.asShape();
         if (forma.getText) {
-          var texto = forma.getText();
-          var contenido = texto.asString();
-          
-          // Buscar marcadores como {{ALGO}} en el texto
-          var regex = /\\{\\{([^\\}]+)\\}\\}/g;
-          var match;
-          
-          while ((match = regex.exec(contenido)) !== null) {
-            var marcadorCompleto = match[0]; // {{ALGO}}
-            var marcadorSinLlaves = match[1]; // ALGO
-            
-            // Buscar en el JSON el marcador completo
-            if (reemplazos.hasOwnProperty(marcadorCompleto)) {
-              texto.replaceAllText(marcadorCompleto, reemplazos[marcadorCompleto]);
-              total++;
-            }
-            // Si no encuentra el marcador completo, buscar sin llaves
-            else if (reemplazos.hasOwnProperty(marcadorSinLlaves)) {
-              texto.replaceAllText(marcadorCompleto, reemplazos[marcadorSinLlaves]);
-              total++;
-            }
+          // Primero hacer los reemplazos según el JSON
+          for (var marcador in reemplazos) {
+            var textoNuevo = reemplazos[marcador];
+            total += reemplazarEnElemento(forma, marcador, textoNuevo);
           }
+          
+          // Después eliminar cualquier llave restante
+          total += eliminarLlavesRestantes(forma);
         }
       }
+      
       // Procesar tablas
       if (elemento.getPageElementType() === SlidesApp.PageElementType.TABLE) {
         var tabla = elemento.asTable();
@@ -220,35 +226,59 @@ function ejecutarReemplazo() {
         for (var r = 0; r < filas; r++) {
           for (var c = 0; c < columnas; c++) {
             var celda = tabla.getCell(r, c);
-            var texto = celda.getText();
-            var contenido = texto.asString();
             
-            // Buscar marcadores como {{ALGO}} en el texto
-            var regex = /\\{\\{([^\\}]+)\\}\\}/g;
-            var match;
-            
-            while ((match = regex.exec(contenido)) !== null) {
-              var marcadorCompleto = match[0]; // {{ALGO}}
-              var marcadorSinLlaves = match[1]; // ALGO
-              
-              // Buscar en el JSON el marcador completo
-              if (reemplazos.hasOwnProperty(marcadorCompleto)) {
-                texto.replaceAllText(marcadorCompleto, reemplazos[marcadorCompleto]);
-                total++;
-              }
-              // Si no encuentra el marcador completo, buscar sin llaves
-              else if (reemplazos.hasOwnProperty(marcadorSinLlaves)) {
-                texto.replaceAllText(marcadorCompleto, reemplazos[marcadorSinLlaves]);
-                total++;
-              }
+            // Primero hacer los reemplazos según el JSON
+            for (var marcador in reemplazos) {
+              var textoNuevo = reemplazos[marcador];
+              total += reemplazarEnElemento(celda, marcador, textoNuevo);
             }
+            
+            // Después eliminar cualquier llave restante
+            total += eliminarLlavesRestantes(celda);
           }
         }
       }
     }
   }
+  
   // Mostrar mensaje de resultado
-  SlidesApp.getUi().alert("Se realizaron " + total + " reemplazos.");
+  SlidesApp.getUi().alert("Se realizaron " + total + " reemplazos y limpiezas.");
+}
+
+// Función auxiliar para reemplazar texto en un elemento
+function reemplazarEnElemento(elemento, marcador, textoNuevo) {
+  var texto = elemento.getText();
+  var contenido = texto.asString();
+  if (contenido.indexOf(marcador) >= 0) {
+    texto.replaceAllText(marcador, textoNuevo);
+    return 1;
+  }
+  return 0;
+}
+
+// Función para eliminar llaves restantes
+function eliminarLlavesRestantes(elemento) {
+  var texto = elemento.getText();
+  var contenido = texto.asString();
+  var total = 0;
+  
+  // Buscar textos con {{}}
+  if (contenido.indexOf('{{') >= 0 && contenido.indexOf('}}') >= 0) {
+    // Encontrar todos los patrones {{texto}}
+    var patron = /\\{\\{([^\\}]+)\\}\\}/g;
+    var coincidencias = contenido.match(patron);
+    
+    if (coincidencias) {
+      for (var k = 0; k < coincidencias.length; k++) {
+        var textoConLlaves = coincidencias[k];
+        var textoSinLlaves = textoConLlaves.substring(2, textoConLlaves.length - 2);
+        texto.replaceAllText(textoConLlaves, textoSinLlaves);
+        total++;
+      }
+    }
+  }
+  
+  return total;
 }`;
 
         // Función para actualizar el script con el JSON
